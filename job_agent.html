@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terry Teng — Opportunity Dashboard</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #f7f7f5;
+    --bg3: #f0efe9;
+    --text: #1a1a18;
+    --text2: #5f5e5a;
+    --text3: #888780;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.18);
+    --accent: #185FA5;
+    --accent-bg: #E6F1FB;
+    --green: #0F6E56;
+    --green-bg: #E1F5EE;
+    --amber: #854F0B;
+    --amber-bg: #FAEEDA;
+    --purple: #3C3489;
+    --purple-bg: #EEEDFE;
+    --coral: #993C1D;
+    --coral-bg: #FAECE7;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg2: #242422;
+      --bg3: #2c2c2a;
+      --text: #f0efe9;
+      --text2: #b4b2a9;
+      --text3: #888780;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.18);
+      --accent: #378ADD;
+      --accent-bg: #042C53;
+      --green: #5DCAA5;
+      --green-bg: #04342C;
+      --amber: #EF9F27;
+      --amber-bg: #412402;
+      --purple: #AFA9EC;
+      --purple-bg: #26215C;
+      --coral: #F0997B;
+      --coral-bg: #4A1B0C;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); font-size: 14px; min-height: 100vh; }
+  .container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+  header { margin-bottom: 2rem; }
+  header h1 { font-size: 22px; font-weight: 600; color: var(--text); }
+  header p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; background: var(--bg); border-radius: var(--radius) var(--radius) 0 0; overflow: hidden; }
+  .tab { padding: 12px 20px; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; color: var(--text2); transition: all .15s; margin-bottom: -1px; background: none; border-top: none; border-left: none; border-right: none; }
+  .tab.active { color: var(--text); border-bottom-color: var(--text); }
+  .tab:hover:not(.active) { color: var(--text); background: var(--bg2); }
+  .panel-wrap { background: var(--bg); border: 1px solid var(--border); border-radius: 0 0 var(--radius) var(--radius); padding: 1.5rem; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); margin-bottom: 12px; }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+  .stat { background: var(--bg2); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
+  .stat .num { font-size: 24px; font-weight: 600; color: var(--text); }
+  .stat .lbl { font-size: 11px; color: var(--text2); margin-top: 3px; line-height: 1.4; }
+  .job-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; transition: border-color .15s; }
+  .job-card:hover { border-color: var(--border2); }
+  .job-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .job-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .job-meta { font-size: 12px; color: var(--text2); margin-top: 3px; }
+  .job-salary { font-size: 12px; color: var(--text2); margin-top: 4px; }
+  .job-salary strong { color: var(--text); }
+  .job-desc { font-size: 12px; color: var(--text2); margin-top: 10px; line-height: 1.55; }
+  .badge-group { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; flex-shrink: 0; }
+  .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+  .b-remote { background: var(--green-bg); color: var(--green); }
+  .b-hybrid { background: var(--accent-bg); color: var(--accent); }
+  .b-gaming { background: var(--purple-bg); color: var(--purple); }
+  .b-saas { background: var(--green-bg); color: var(--green); }
+  .b-hot { background: var(--coral-bg); color: var(--coral); }
+  .b-contract { background: var(--amber-bg); color: var(--amber); }
+  .apply-btn { font-size: 12px; padding: 6px 14px; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: transparent; color: var(--text); cursor: pointer; transition: all .15s; white-space: nowrap; text-decoration: none; display: inline-block; }
+  .apply-btn:hover { background: var(--bg2); }
+  .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+  .platform-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem; }
+  .platform-chip { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: all .15s; color: var(--text); text-decoration: none; }
+  .platform-chip:hover { border-color: var(--border2); background: var(--bg2); }
+  .income-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+  .income-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+  .income-card .title { font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+  .income-card .desc { font-size: 12px; color: var(--text2); line-height: 1.55; margin-bottom: 8px; }
+  .income-card .earn { font-size: 12px; color: var(--green); font-weight: 600; margin-bottom: 8px; }
+  .speed-bar { height: 4px; border-radius: 2px; background: var(--bg2); margin-bottom: 4px; overflow: hidden; }
+  .speed-fill { height: 100%; border-radius: 2px; }
+  .speed-label { font-size: 11px; color: var(--text3); margin-bottom: 10px; }
+  .action-btn { width: 100%; padding: 8px; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: transparent; font-size: 12px; cursor: pointer; color: var(--text); transition: all .15s; text-align: center; text-decoration: none; display: block; }
+  .action-btn:hover { background: var(--bg2); }
+  .gh-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 14px; }
+  .gh-icon { width: 38px; height: 38px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .gh-card .title { font-size: 13px; font-weight: 600; margin-bottom: 3px; color: var(--text); }
+  .gh-card .sub { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .gh-card .status { font-size: 11px; margin-top: 6px; color: var(--green); }
+  @media (max-width: 600px) {
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    .income-grid { grid-template-columns: 1fr; }
+    .job-header { flex-direction: column; }
+    .badge-group { flex-direction: row; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Terry J. Teng — Opportunity Dashboard</h1>
+    <p>Job search · Income streams · GitHub portfolio tracker · Updated May 2026</p>
+  </header>
+
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('jobs', this)">💼 Job leads</button>
+    <button class="tab" onclick="switchTab('income', this)">💰 Income streams</button>
+    <button class="tab" onclick="switchTab('portfolio', this)">📁 GitHub portfolio</button>
+  </div>
+
+  <div class="panel-wrap">
+    <!-- JOBS -->
+    <div class="panel active" id="tab-jobs">
+      <div class="stat-row">
+        <div class="stat"><div class="num">242+</div><div class="lbl">Remote PM openings (LA)</div></div>
+        <div class="stat"><div class="num">459+</div><div class="lbl">Remote Program Mgr (LA)</div></div>
+        <div class="stat"><div class="num">178+</div><div class="lbl">Game Producer (US)</div></div>
+      </div>
+
+      <div class="section-label">Top matched openings — apply now</div>
+
+      <div class="job-card">
+        <div class="job-header">
+          <div>
+            <div class="job-title">Senior Product Manager — Studio Distribution</div>
+            <div class="job-meta">NBCUniversal · Los Angeles, CA</div>
+            <div class="job-salary">💰 <strong>$110K–$145K/yr</strong></div>
+          </div>
+          <div class="badge-group">
+            <span class="badge b-hybrid">Hybrid LA</span>
+            <a class="apply-btn" href="https://www.builtinla.com/jobs/product" target="_blank">Apply ↗</a>
+          </div>
+        </div>
+        <div class="job-desc">Leads Studio Distribution reporting & analytics platform. Roadmap ownership, SQL/Tableau data tools. Direct match: GTM PM background + analytics platform experience at Google.</div>
+      </div>
+
+      <div class="job-card">
+        <div class="job-header">
+          <div>
+            <div class="job-title">Senior Product Manager — Growth</div>
+            <div class="job-meta">Splice · Remote (US)</div>
+            <div class="job-salary">💰 <strong>Est. $140K–$180K/yr</strong></div>
+          </div>
+          <div class="badge-group">
+            <span class="badge b-remote">Remote</span>
+            <span class="badge b-gaming">Music/Gaming adjacent</span>
+            <a class="apply-btn" href="https://www.ziprecruiter.com/Jobs/Remote-Product-Manager/--in-California" target="_blank">Apply ↗</a>
+          </div>
+        </div>
+        <div class="job-desc">Growth PM for multi-product ecosystem. A/B testing, funnel optimization, user acquisition. Matches your 30% product adoption lift work at Google Local Services.</div>
+      </div>
+
+      <div class="job-card">
+        <div class="job-header">
+          <div>
+            <div class="job-title">Sr. Product Manager — Provider Experience</div>
+            <div class="job-meta">Rula · Los Angeles, CA (Remote)</div>
+            <div class="job-salary">💰 <strong>Competitive B2B SaaS</strong></div>
+          </div>
+          <div class="badge-group">
+            <span class="badge b-remote">Remote</span>
+            <span class="badge b-saas">B2B SaaS</span>
+            <a class="apply-btn" href="https://www.indeed.com/q-product-manager-remote-l-california-jobs.html" target="_blank">Apply ↗</a>
+          </div>
+        </div>
+        <div class="job-desc">Full product lifecycle ownership, PRD writing, cross-functional leadership. Strong B2B SaaS match for CreatorIQ + Xsolla background.</div>
+      </div>
+
+      <div class="job-card">
+        <div class="job-header">
+          <div>
+            <div class="job-title">Technical Producer / Product Owner — Games</div>
+            <div class="job-meta">Multiple Studios · LA / Remote</div>
+            <div class="job-salary">💰 <strong>$130K–$175K/yr</strong></div>
+          </div>
+          <div class="badge-group">
+            <span class="badge b-gaming">Gaming</span>
+            <a class="apply-btn" href="https://www.linkedin.com/jobs/technical-producer-jobs-los-angeles-ca" target="_blank">158 on LinkedIn ↗</a>
+          </div>
+        </div>
+        <div class="job-desc">158 active Technical Producer openings in LA on LinkedIn right now. Riot Games + Xsolla game production background is a direct match.</div>
+      </div>
+
+      <div class="job-card">
+        <div class="job-header">
+          <div>
+            <div class="job-title">Game Producer — Various Roles</div>
+            <div class="job-meta">LA Area Game Studios · Remote / Hybrid</div>
+            <div class="job-salary">💰 <strong>$120K–$165K/yr</strong></div>
+          </div>
+          <div class="badge-group">
+            <span class="badge b-gaming">Gaming</span>
+            <span class="badge b-hot">32 in LA</span>
+            <a class="apply-btn" href="https://www.linkedin.com/jobs/game-producer-jobs-los-angeles-ca" target="_blank">32 in LA ↗</a>
+          </div>
+        </div>
+        <div class="job-desc">32 Game Producer openings in LA area, 178 nationwide. Arcane Showdown + Riot Games live-ops experience makes you a top-tier candidate.</div>
+      </div>
+
+      <div class="job-card">
+        <div class="job-header">
+          <div>
+            <div class="job-title">Senior Program Manager — GTM Ops</div>
+            <div class="job-meta">Vanta · Remote (US)</div>
+            <div class="job-salary">💰 <strong>Est. $150K–$190K/yr</strong></div>
+          </div>
+          <div class="badge-group">
+            <span class="badge b-remote">Remote</span>
+            <span class="badge b-saas">B2B SaaS</span>
+            <a class="apply-btn" href="https://www.indeed.com/q-senior-program-manager-l-remote-jobs.html" target="_blank">Apply ↗</a>
+          </div>
+        </div>
+        <div class="job-desc">End-to-end GTM program management, market expansion, channel strategy. Google GTM background across 121 locations is a direct credential match.</div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">Search more live listings</div>
+      <div class="platform-row">
+        <a class="platform-chip" href="https://www.linkedin.com/jobs/remote-product-manager-jobs-los-angeles-ca" target="_blank">LinkedIn — 242 remote PM (LA)</a>
+        <a class="platform-chip" href="https://www.builtinla.com/jobs/product" target="_blank">Built In LA — PM</a>
+        <a class="platform-chip" href="https://www.builtinla.com/jobs/remote/gaming" target="_blank">Built In LA — Gaming</a>
+        <a class="platform-chip" href="https://www.ziprecruiter.com/Jobs/Remote-Product-Manager/-in-Los-Angeles,CA" target="_blank">ZipRecruiter</a>
+        <a class="platform-chip" href="https://wellfound.com/role/l/product-manager/los-angeles" target="_blank">Wellfound (Startups)</a>
+        <a class="platform-chip" href="https://remoteok.com/remote-product-manager-jobs" target="_blank">RemoteOK</a>
+        <a class="platform-chip" href="https://www.remoterocketship.com/jobs/senior-product-manager/" target="_blank">Remote Rocketship</a>
+      </div>
+    </div>
+
+    <!-- INCOME -->
+    <div class="panel" id="tab-income">
+      <div class="section-label">Fastest path to income — ranked by speed</div>
+      <div class="income-grid">
+        <div class="income-card">
+          <div class="title">Fractional / Contract PM</div>
+          <div class="desc">Toptal, Contra, or Upwork. Google + Riot + Meta résumé commands premium rates. Contra is zero-commission and fastest to first client.</div>
+          <div class="earn">$100–$175/hr · 3–6 month engagements</div>
+          <div class="speed-bar"><div class="speed-fill" style="width:90%;background:#1D9E75"></div></div>
+          <div class="speed-label">Speed to first $ — 1–3 weeks (Contra/Upwork)</div>
+          <a class="action-btn" href="https://contra.com/" target="_blank">Set up Contra profile ↗</a>
+        </div>
+        <div class="income-card">
+          <div class="title">Contract Scrum Master</div>
+          <div class="desc">CSM cert + enterprise Agile experience. Companies hire for 3–6 month sprints. High demand, low competition from true practitioners at this experience level.</div>
+          <div class="earn">$80–$130/hr · short-term contracts</div>
+          <div class="speed-bar"><div class="speed-fill" style="width:85%;background:#1D9E75"></div></div>
+          <div class="speed-label">Speed to first $ — 2–4 weeks</div>
+          <a class="action-btn" href="https://www.upwork.com/hire/product-managers/us/" target="_blank">Find on Upwork ↗</a>
+        </div>
+        <div class="income-card">
+          <div class="title">PM Interview Coaching</div>
+          <div class="desc">Maven or direct via LinkedIn. Aspiring PMs pay $150–$300/session to talk to someone with your résumé. 4 sessions/week = $2,400–$4,800/month alongside full-time search.</div>
+          <div class="earn">$150–$300/session</div>
+          <div class="speed-bar"><div class="speed-fill" style="width:75%;background:#1D9E75"></div></div>
+          <div class="speed-label">Speed to first $ — 1–2 weeks</div>
+          <a class="action-btn" href="https://maven.com/" target="_blank">List on Maven ↗</a>
+        </div>
+        <div class="income-card">
+          <div class="title">Notion + Jira PM Templates</div>
+          <div class="desc">Sell real-world PM artifacts from Google/Riot/Meta work. Creators earn $500–$5K/month. Niche templates (game studio sprint planning, B2B SaaS PRD kits) outsell generic ones consistently.</div>
+          <div class="earn">$29–$99/template · true passive income</div>
+          <div class="speed-bar"><div class="speed-fill" style="width:65%;background:#BA7517"></div></div>
+          <div class="speed-label">Speed to first $ — 2–4 weeks (once live)</div>
+          <a class="action-btn" href="https://gumroad.com/" target="_blank">Open Gumroad store ↗</a>
+        </div>
+        <div class="income-card">
+          <div class="title">Technical Writing Contracts</div>
+          <div class="desc">PRDs, API docs, post-mortems, incident reports. Your documentation background at Google + Meta is a rare combination startups will pay well for.</div>
+          <div class="earn">$75–$150/hr · project-based</div>
+          <div class="speed-bar"><div class="speed-fill" style="width:70%;background:#BA7517"></div></div>
+          <div class="speed-label">Speed to first $ — 2–3 weeks</div>
+          <a class="action-btn" href="https://contra.com/" target="_blank">Find on Contra ↗</a>
+        </div>
+        <div class="income-card">
+          <div class="title">Udemy / Skillshare Course</div>
+          <div class="desc">"Agile PM for Game Studios" or "B2B SaaS Roadmapping from 0-to-1" — this niche is underserved. Takes 4–8 weeks to build but earns passively for years.</div>
+          <div class="earn">$200–$2,000/month passive</div>
+          <div class="speed-bar"><div class="speed-fill" style="width:40%;background:#BA7517"></div></div>
+          <div class="speed-label">Speed to first $ — 6–10 weeks</div>
+          <a class="action-btn" href="https://www.udemy.com/teaching/" target="_blank">Start on Udemy ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PORTFOLIO -->
+    <div class="panel" id="tab-portfolio">
+      <div class="section-label">pm-portfolio repo — artifact tracker</div>
+
+      <div class="gh-card">
+        <div class="gh-icon" style="background:var(--green-bg)">📋</div>
+        <div style="flex:1">
+          <div class="title">PRD — B2B SaaS Feature (Vendor Portal)</div>
+          <div class="sub">Full product requirements doc with problem statement, user stories, acceptance criteria, and success metrics. Based on Riot Games CRM tool work. Pillar: Product Strategy.</div>
+          <div class="status">● Ready to draft</div>
+        </div>
+      </div>
+
+      <div class="gh-card">
+        <div class="gh-icon" style="background:var(--purple-bg)">🗺</div>
+        <div style="flex:1">
+          <div class="title">Product Roadmap — 18-Month SaaS Platform</div>
+          <div class="sub">Prioritized roadmap with Now/Next/Later framework, OKR alignment, and stakeholder narrative. Modeled on Xsolla backend infrastructure PM work. Pillar: Product Strategy.</div>
+          <div class="status">● Ready to draft</div>
+        </div>
+      </div>
+
+      <div class="gh-card">
+        <div class="gh-icon" style="background:var(--accent-bg)">🔬</div>
+        <div style="flex:1">
+          <div class="title">Product Teardown — Competitive Analysis</div>
+          <div class="sub">Deep teardown of Xsolla vs Stripe vs Paddle as B2B payment platforms for game studios. UX analysis, monetization model, strategic recommendations. Pillar: Technical Depth.</div>
+          <div class="status">● Ready to draft</div>
+        </div>
+      </div>
+
+      <div class="gh-card">
+        <div class="gh-icon" style="background:var(--coral-bg)">🚨</div>
+        <div style="flex:1">
+          <div class="title">Incident Post-Mortem — P0 Payment Outage</div>
+          <div class="sub">Fictional but realistic P0 write-up: payment processing outage during game launch. Timeline, root cause, impact, blameless retrospective. Pillar: Technical Depth.</div>
+          <div class="status">● Ready to draft</div>
+        </div>
+      </div>
+
+      <div class="gh-card">
+        <div class="gh-icon" style="background:var(--green-bg)">👤</div>
+        <div style="flex:1">
+          <div class="title">User Research Synthesis — Interview Findings</div>
+          <div class="sub">5-user interview synthesis with affinity mapping, insight clusters, and product recommendations. Targeting game studio pain points in payment platforms. Pillar: User Research & Design.</div>
+          <div class="status">● Ready to draft</div>
+        </div>
+      </div>
+
+      <div class="gh-card">
+        <div class="gh-icon" style="background:var(--amber-bg)">🔌</div>
+        <div style="flex:1">
+          <div class="title">API & Data Model Documentation</div>
+          <div class="sub">Technical spec for a game studio vendor management platform. Entity relationships, API endpoints, data schema tables. Shows PM-level technical fluency. Pillar: Technical Depth.</div>
+          <div class="status">● Ready to draft</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <a class="action-btn" href="https://github.com/terryjteng/pm-portfolio" target="_blank" style="margin-bottom:8px">View pm-portfolio repo on GitHub ↗</a>
+      <a class="action-btn" href="https://github.com/terryjteng" target="_blank">View all Terry's repos ↗</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+</script>
+</body>
+</html>
