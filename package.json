@@ -1,0 +1,14 @@
+{
+  "name": "kato8-job-agent",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Terry's personal opportunity dashboard. Not part of Kato.8 studio operations.",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1"
+  },
+  "engines": { "node": ">=20" }
+}
